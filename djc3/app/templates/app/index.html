@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Django Channels</title>
+  </head>
+  <body>
+    <h1>Django Channel Count</h1>
+    <h2 id="ct"></h2>
+
+    <script>
+
+        const ws = new WebSocket('ws://127.0.0.1:8000/ws/sc/')
+        const ct = document.getElementById('ct')
+
+        /* ws.onopen = () => {
+            console.log("Websocket connection open...")
+            ws.send("Holaa! Message form Client...")
+        }
+
+        ws.onmessage = (event) => {
+            console.log("Message receieved from server...", event.data)
+        }
+
+        ws.onerror = (event) => {
+            console.log("Websocket Error Occurred...", event)
+        }
+
+        ws.onclose = (event) => {
+            console.log("Websocket Connection Closed...", event)
+        } */
+
+        //<!-- same work using events -->
+
+
+        ws.addEventListener('open', () => {
+            console.log("Websocket connection open...")
+            ws.send("Holaa! Message form Client to Server...")
+        })
+
+        /* ws.addEventListener('message', (event) => {
+            console.log("EVENT: ", event)
+            console.log("Message receieved from server...", event.data)
+            ct.innerText = event.data
+        }) */
+
+        ws.addEventListener('message', (event) => {
+            console.log("EVENT: ", event)
+            data = JSON.parse(event.data)  //change form string into javascript object
+            console.log("Message receieved from server...", data.count)
+            ct.innerText = data.count
+        }) 
+
+        ws.addEventListener('error', (event) => {
+            console.log("Websocket Error Occurred...", event)
+        })
+
+        ws.addEventListener('close', (event) => {
+            console.log("Websocket Connection Closed...", event)
+        })
+
+    </script>
+  </body>
+</html>

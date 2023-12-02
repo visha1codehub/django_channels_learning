@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+  </head>
+  <body>
+    <h1>Group Name: {{groupName}}</h1>
+    <textarea id="chat-log" cols="80" rows="15" readonly>
+      {% for chat in chats %}
+        {{chat.user.username|default:"anonymous"}} : {{chat}}
+      {% endfor %}
+    </textarea><br>
+    <input type="text" id="chat-message-input" size="70">
+    <input type="button" value="Send" id="chat-message-submit">
+    {{groupName | json_script:"group-name"}}
+
+    <script>
+      const groupname = JSON.parse(document.getElementById('group-name').textContent)
+      console.log(groupname)
+      const ws = new WebSocket(
+        'ws://' +
+        window.location.host +
+        '/ws/sc/' +
+        groupname +
+        '/'
+      )
+      ws.onopen = () => {
+        console.log("Websocket connection open...");
+      };
+
+      ws.onmessage = (event) => {
+        console.log("Message receieved from server...", event);
+        const data = JSON.parse(event.data)
+        console.log("🥶",data.msg)
+        document.querySelector('#chat-log').value += (data.user + " : " + data.msg + '\n')
+      };
+
+      ws.onclose = (event) => {
+        console.error("Websocket Connection Closed Unexpectedly...");
+      };
+
+      document.getElementById('chat-message-submit').onclick = (event) => {
+        const messageInputDom = document.getElementById('chat-message-input')
+        const message = messageInputDom.value 
+        ws.send(JSON.stringify({
+            'msg' : message
+        }))
+        messageInputDom.value = ""
+      }
+    </script>
+  </body>
+</html>
